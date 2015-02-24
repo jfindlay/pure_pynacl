@@ -712,7 +712,7 @@ int crypto_scalarmult(u8 *q,const u8 *n,const u8 *p)
 }
 
 int crypto_scalarmult_base(u8 *q,const u8 *n)
-{ 
+{
   return crypto_scalarmult(q,n,_9);
 }
 
@@ -761,7 +761,7 @@ static u64 Sigma1(u64 x) { return R(x,14) ^ R(x,18) ^ R(x,41); }
 static u64 sigma0(u64 x) { return R(x, 1) ^ R(x, 8) ^ (x >> 7); }
 static u64 sigma1(u64 x) { return R(x,19) ^ R(x,61) ^ (x >> 6); }
 
-static const u64 K[80] = 
+static const u64 K[80] =
 {
   0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL, 0xb5c0fbcfec4d3b2fULL, 0xe9b5dba58189dbbcULL,
   0x3956c25bf348b538ULL, 0x59f111f1b605d019ULL, 0x923f82a4af194f9bULL, 0xab1c5ed5da6d8118ULL,
@@ -802,8 +802,8 @@ int crypto_hashblocks(u8 *x,const u8 *m,u64 n)
       b[3] += t;
       FOR(j,8) a[(j+1)%8] = b[j];
       if (i%16 == 15)
-	FOR(j,16)
-	  w[j] += w[(j+9)%16] + sigma0(w[(j+1)%16]) + sigma1(w[(j+14)%16]);
+        FOR(j,16)
+          w[j] += w[(j+9)%16] + sigma0(w[(j+1)%16]) + sigma1(w[(j+14)%16]);
     }
 
     FOR(i,8) { a[i] += z[i]; z[i] = a[i]; }
@@ -857,7 +857,7 @@ int crypto_hash(u8 *out,const u8 *m,u64 n)
 sv add(gf p[4],gf q[4])
 {
   gf a,b,c,d,t,e,f,g,h;
-  
+
   Z(a, p[1], p[0]);
   Z(t, q[1], q[0]);
   M(a, a, t);
@@ -889,7 +889,7 @@ sv cswap(gf p[4],gf q[4],u8 b)
 sv pack(u8 *r,gf p[4])
 {
   gf tx, ty, zi;
-  inv25519(zi, p[2]); 
+  inv25519(zi, p[2]);
   M(tx, p[0], zi);
   M(ty, p[1], zi);
   pack25519(r, ty);
