@@ -1,5 +1,5 @@
-int crypto_auth_hmacsha512256_tweet(unsigned char *,const unsigned char *,unsigned long long,const unsigned char *);
-int crypto_auth_hmacsha512256_tweet_verify(const unsigned char *,const unsigned char *,unsigned long long,const unsigned char *);
+//int crypto_auth_hmacsha512256_tweet(unsigned char *,const unsigned char *,unsigned long long,const unsigned char *);
+//int crypto_auth_hmacsha512256_tweet_verify(const unsigned char *,const unsigned char *,unsigned long long,const unsigned char *);
 int crypto_box_curve25519xsalsa20poly1305_tweet(unsigned char *,const unsigned char *,unsigned long long,const unsigned char *,const unsigned char *,const unsigned char *);
 int crypto_box_curve25519xsalsa20poly1305_tweet_open(unsigned char *,const unsigned char *,unsigned long long,const unsigned char *,const unsigned char *,const unsigned char *);
 int crypto_box_curve25519xsalsa20poly1305_tweet_keypair(unsigned char *,unsigned char *);
@@ -9,9 +9,9 @@ int crypto_box_curve25519xsalsa20poly1305_tweet_open_afternm(unsigned char *,con
 int crypto_core_salsa20_tweet(unsigned char *,const unsigned char *,const unsigned char *,const unsigned char *);
 int crypto_core_hsalsa20_tweet(unsigned char *,const unsigned char *,const unsigned char *,const unsigned char *);
 int crypto_hashblocks_sha512_tweet(unsigned char *,const unsigned char *,unsigned long long);
-int crypto_hashblocks_sha256_tweet(unsigned char *,const unsigned char *,unsigned long long);
+//int crypto_hashblocks_sha256_tweet(unsigned char *,const unsigned char *,unsigned long long);
 int crypto_hash_sha512_tweet(unsigned char *,const unsigned char *,unsigned long long);
-int crypto_hash_sha256_tweet(unsigned char *,const unsigned char *,unsigned long long);
+//int crypto_hash_sha256_tweet(unsigned char *,const unsigned char *,unsigned long long);
 int crypto_onetimeauth_poly1305_tweet(unsigned char *,const unsigned char *,unsigned long long,const unsigned char *);
 int crypto_onetimeauth_poly1305_tweet_verify(const unsigned char *,const unsigned char *,unsigned long long,const unsigned char *);
 int crypto_scalarmult_curve25519_tweet(unsigned char *,const unsigned char *,const unsigned char *);
