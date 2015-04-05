@@ -36,10 +36,10 @@ typedef i64 gf[16];
 
 void randombytes(u8 *c, u64 s) {}
 
-static const u8
+const u8
   _0[16],
   _9[32] = {9};
-static const gf
+const gf
   gf0,
   gf1 = {1},
   _121665 = {0xDB41,1},
@@ -49,9 +49,9 @@ static const gf
   Y = {0x6658, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666},
   I = {0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43, 0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83};
 
-static u32 L32(u32 x,int c) { return (x << c) | ((x&0xffffffff) >> (32 - c)); }
+u32 L32(u32 x,int c) { return (x << c) | ((x&0xffffffff) >> (32 - c)); }
 
-static u32 ld32(const u8 *x)
+u32 ld32(const u8 *x)
 {
   u32 u = x[3];
   u = (u<<8)|x[2];
@@ -59,26 +59,26 @@ static u32 ld32(const u8 *x)
   return (u<<8)|x[0];
 }
 
-static u64 dl64(const u8 *x)
+u64 dl64(const u8 *x)
 {
   u64 i,u=0;
   for (i = 0;i < 8;++i) u=(u<<8)|x[i];
   return u;
 }
 
-static void st32(u8 *x,u32 u)
+void st32(u8 *x,u32 u)
 {
   int i;
   for (i = 0;i < 4;++i) { x[i] = u; u >>= 8; }
 }
 
-static void ts64(u8 *x,u64 u)
+void ts64(u8 *x,u64 u)
 {
   int i;
   for (i = 7;i >= 0;--i) { x[i] = u; u >>= 8; }
 }
 
-static int vn(const u8 *x,const u8 *y,int n)
+int vn(const u8 *x,const u8 *y,int n)
 {
   u32 i,d = 0;
   for (i = 0;i < n;++i) d |= x[i]^y[i];
@@ -95,7 +95,7 @@ int crypto_verify_32_tweet(const u8 *x,const u8 *y)
   return vn(x,y,32);
 }
 
-static void core(u8 *out,const u8 *in,const u8 *k,const u8 *c,int h)
+void core(u8 *out,const u8 *in,const u8 *k,const u8 *c,int h)
 {
   u32 w[16],x[16],y[16],t[4];
   int i,j,m;
@@ -147,7 +147,7 @@ int crypto_core_hsalsa20_tweet(u8 *out,const u8 *in,const u8 *k,const u8 *c)
   return 0;
 }
 
-static const u8 sigma[16] = "expand 32-byte k";
+const u8 sigma[16] = "expand 32-byte k";
 
 int crypto_stream_salsa20_tweet_xor(u8 *c,const u8 *m,u64 b,const u8 *n,const u8 *k)
 {
@@ -195,7 +195,7 @@ int crypto_stream_xsalsa20_tweet_xor(u8 *c,const u8 *m,u64 d,const u8 *n,const u
   return crypto_stream_salsa20_tweet_xor(c,m,d,n+16,s);
 }
 
-static void add1305(u32 *h,const u32 *c)
+void add1305(u32 *h,const u32 *c)
 {
   u32 j,u = 0;
   for (j = 0;j < 17;++j) {
@@ -205,7 +205,7 @@ static void add1305(u32 *h,const u32 *c)
   }
 }
 
-static const u32 minusp[17] = {
+const u32 minusp[17] = {
   5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 252
 } ;
 
@@ -291,13 +291,13 @@ int crypto_secretbox_xsalsa20poly1305_tweet_open(u8 *m,const u8 *c,u64 d,const u
   return 0;
 }
 
-static void set25519(gf r, const gf a)
+void set25519(gf r, const gf a)
 {
   int i;
   for (i = 0;i < 16;++i) r[i]=a[i];
 }
 
-static void car25519(gf o)
+void car25519(gf o)
 {
   int i;
   i64 c;
@@ -309,7 +309,7 @@ static void car25519(gf o)
   }
 }
 
-static void sel25519(gf p,gf q,int b)
+void sel25519(gf p,gf q,int b)
 {
   i64 t,i,c=~(b-1);
   for (i = 0;i < 16;++i) {
@@ -319,7 +319,7 @@ static void sel25519(gf p,gf q,int b)
   }
 }
 
-static void pack25519(u8 *o,const gf n)
+void pack25519(u8 *o,const gf n)
 {
   int i,j,b;
   gf m,t;
@@ -344,7 +344,7 @@ static void pack25519(u8 *o,const gf n)
   }
 }
 
-static int neq25519(const gf a, const gf b)
+int neq25519(const gf a, const gf b)
 {
   u8 c[32],d[32];
   pack25519(c,a);
@@ -352,33 +352,33 @@ static int neq25519(const gf a, const gf b)
   return crypto_verify_32_tweet(c,d);
 }
 
-static u8 par25519(const gf a)
+u8 par25519(const gf a)
 {
   u8 d[32];
   pack25519(d,a);
   return d[0]&1;
 }
 
-static void unpack25519(gf o, const u8 *n)
+void unpack25519(gf o, const u8 *n)
 {
   int i;
   for (i = 0;i < 16;++i) o[i]=n[2*i]+((i64)n[2*i+1]<<8);
   o[15]&=0x7fff;
 }
 
-static void A(gf o,const gf a,const gf b)
+void A(gf o,const gf a,const gf b)
 {
   int i;
   for (i = 0;i < 16;++i) o[i]=a[i]+b[i];
 }
 
-static void Z(gf o,const gf a,const gf b)
+void Z(gf o,const gf a,const gf b)
 {
   int i;
   for (i = 0;i < 16;++i) o[i]=a[i]-b[i];
 }
 
-static void M(gf o,const gf a,const gf b)
+void M(gf o,const gf a,const gf b)
 {
   i64 i,j,t[31];
   for (i = 0;i < 31;++i) t[i]=0;
@@ -389,12 +389,12 @@ static void M(gf o,const gf a,const gf b)
   car25519(o);
 }
 
-static void S(gf o,const gf a)
+void S(gf o,const gf a)
 {
   M(o,a,a);
 }
 
-static void inv25519(gf o,const gf i)
+void inv25519(gf o,const gf i)
 {
   gf c;
   int a;
@@ -406,7 +406,7 @@ static void inv25519(gf o,const gf i)
   for (a = 0;a < 16;++a) o[a]=c[a];
 }
 
-static void pow2523(gf o,const gf i)
+void pow2523(gf o,const gf i)
 {
   gf c;
   int a;
@@ -511,15 +511,15 @@ int crypto_box_curve25519xsalsa20poly1305_tweet_open(u8 *m,const u8 *c,u64 d,con
   return crypto_box_curve25519xsalsa20poly1305_tweet_open_afternm(m,c,d,n,k);
 }
 
-static u64 R(u64 x,int c) { return (x >> c) | (x << (64 - c)); }
-static u64 Ch(u64 x,u64 y,u64 z) { return (x & y) ^ (~x & z); }
-static u64 Maj(u64 x,u64 y,u64 z) { return (x & y) ^ (x & z) ^ (y & z); }
-static u64 Sigma0(u64 x) { return R(x,28) ^ R(x,34) ^ R(x,39); }
-static u64 Sigma1(u64 x) { return R(x,14) ^ R(x,18) ^ R(x,41); }
-static u64 sigma0(u64 x) { return R(x, 1) ^ R(x, 8) ^ (x >> 7); }
-static u64 sigma1(u64 x) { return R(x,19) ^ R(x,61) ^ (x >> 6); }
+u64 R(u64 x,int c) { return (x >> c) | (x << (64 - c)); }
+u64 Ch(u64 x,u64 y,u64 z) { return (x & y) ^ (~x & z); }
+u64 Maj(u64 x,u64 y,u64 z) { return (x & y) ^ (x & z) ^ (y & z); }
+u64 Sigma0(u64 x) { return R(x,28) ^ R(x,34) ^ R(x,39); }
+u64 Sigma1(u64 x) { return R(x,14) ^ R(x,18) ^ R(x,41); }
+u64 sigma0(u64 x) { return R(x, 1) ^ R(x, 8) ^ (x >> 7); }
+u64 sigma1(u64 x) { return R(x,19) ^ R(x,61) ^ (x >> 6); }
 
-static const u64 K[80] =
+const u64 K[80] =
 {
   0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL, 0xb5c0fbcfec4d3b2fULL, 0xe9b5dba58189dbbcULL,
   0x3956c25bf348b538ULL, 0x59f111f1b605d019ULL, 0x923f82a4af194f9bULL, 0xab1c5ed5da6d8118ULL,
@@ -575,7 +575,7 @@ int crypto_hashblocks_sha512_tweet(u8 *x,const u8 *m,u64 n)
   return n;
 }
 
-static const u8 iv[64] = {
+const u8 iv[64] = {
   0x6a,0x09,0xe6,0x67,0xf3,0xbc,0xc9,0x08,
   0xbb,0x67,0xae,0x85,0x84,0xca,0xa7,0x3b,
   0x3c,0x6e,0xf3,0x72,0xfe,0x94,0xf8,0x2b,
@@ -612,7 +612,7 @@ int crypto_hash_sha512_tweet(u8 *out,const u8 *m,u64 n)
   return 0;
 }
 
-static void add(gf p[4],gf q[4])
+void add(gf p[4],gf q[4])
 {
   gf a,b,c,d,t,e,f,g,h;
 
@@ -637,14 +637,14 @@ static void add(gf p[4],gf q[4])
   M(p[3], e, h);
 }
 
-static void cswap(gf p[4],gf q[4],u8 b)
+void cswap(gf p[4],gf q[4],u8 b)
 {
   int i;
   for (i = 0;i < 4;++i)
     sel25519(p[i],q[i],b);
 }
 
-static void pack(u8 *r,gf p[4])
+void pack(u8 *r,gf p[4])
 {
   gf tx, ty, zi;
   inv25519(zi, p[2]);
@@ -654,7 +654,7 @@ static void pack(u8 *r,gf p[4])
   r[31] ^= par25519(tx) << 7;
 }
 
-static void scalarmult(gf p[4],gf q[4],const u8 *s)
+void scalarmult(gf p[4],gf q[4],const u8 *s)
 {
   int i;
   set25519(p[0],gf0);
@@ -670,7 +670,7 @@ static void scalarmult(gf p[4],gf q[4],const u8 *s)
   }
 }
 
-static void scalarbase(gf p[4],const u8 *s)
+void scalarbase(gf p[4],const u8 *s)
 {
   gf q[4];
   set25519(q[0],X);
@@ -699,9 +699,9 @@ int crypto_sign_ed25519_tweet_keypair(u8 *pk, u8 *sk)
   return 0;
 }
 
-static const u64 L[32] = {0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10};
+const u64 L[32] = {0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10};
 
-static void modL(u8 *r,i64 x[64])
+void modL(u8 *r,i64 x[64])
 {
   i64 carry,i,j;
   for (i = 63;i >= 32;--i) {
@@ -727,7 +727,7 @@ static void modL(u8 *r,i64 x[64])
   }
 }
 
-static void reduce(u8 *r)
+void reduce(u8 *r)
 {
   i64 x[64],i;
   for (i = 0;i < 64;++i) x[i] = (u64) r[i];
@@ -767,7 +767,7 @@ int crypto_sign_ed25519_tweet(u8 *sm,u64 *smlen,const u8 *m,u64 n,const u8 *sk)
   return 0;
 }
 
-static int unpackneg(gf r[4],const u8 p[32])
+int unpackneg(gf r[4],const u8 p[32])
 {
   gf t, chk, num, den, den2, den4, den6;
   set25519(r[2],gf1);
