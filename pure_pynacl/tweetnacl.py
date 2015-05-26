@@ -83,32 +83,34 @@ I = gf([0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43, 0xd7a7, 
 
 def L32(x, c):
     '''static u32 L32(u32 x, int c)'''
-    return (x << c) | ((x & 0xffffffff) >> (32 - c))
+    return (u32(x) << c) | ((u32(x) & 0xffffffff) >> (32 - c))
 
 
 def ld32(x):
     '''u32 ld32(const u8*x)'''
     u = u32(x[3])
-    u = (u << 8) | x[2]
-    u = (u << 8) | x[1]
-    return (u << 8) | x[0]
+    u = (u << 8) | u32(x[2])
+    u = (u << 8) | u32(x[1])
+    return (u << 8) | u32(x[0])
 
 
 def dl64(x):
     '''u64 dl64(const u8*x)'''
     u = u64()
-    for i in range(8): u = (u << 8) | x[i]
+    for i in range(8): u = (u << 8) | u8(x[i])
     return u
 
 
 def st32(x, u):
     '''void st32(u8*x, u32 u)'''
-    for i in range(4): x[i] = u; u >>= 8
+    for i in range(4): x[i] = u8(u); u >>= 8
+    return x
 
 
 def ts64(x, u):
     '''void ts64(u8*x, u64 u)'''
-    for i in range(7, -1, -1): x[i] = u; u >>= 8
+    for i in range(7, -1, -1): x[i] = u8(u); u >>= 8
+    return x
 
 
 def vn(x, y, n):
@@ -136,10 +138,10 @@ def core(out, in_, k, c, h):
     t = IntArray(u32, size=4)
 
     for i in range(4):
-        x[5*i] = ld32(c + 4*i)
-        x[1 + i] = ld32(k + 4*i)
-        x[6 + i] = ld32(in_ + 4*i)
-        x[11 + i] = ld32(k + 16 + 4*i)
+        x[5*i] = ld32(c[4*i:])
+        x[1 + i] = ld32(k[4*i:])
+        x[6 + i] = ld32(in_[4*i:])
+        x[11 + i] = ld32(k[16 + 4*i:])
 
     for i in range(16): y[i] = x[i]
 
@@ -156,13 +158,14 @@ def core(out, in_, k, c, h):
     if h:
         for i in range(16): x[i] += y[i]
         for i in range(4):
-            x[5*i] -= ld32(c + 4*i)
-            x[6+i] -= ld32(in_ + 4*i)
+            x[5*i] -= ld32(c[4*i:])
+            x[6+i] -= ld32(in_[4*i:])
         for i in range(4):
-            st32(out + 4*i, x[5*i])
-            st32(out + 16 + 4*i, x[6 + i])
+            out[4*i:] = st32(out[4*i:], x[5*i])
+            out[16 + 4*i:] = st32(out[16 + 4*i:], x[6 + i])
     else:
-        for i in range(16): st32(out + 4*i, x[i] + y[i])
+        for i in range(16):
+            out[4*i:] = st32(out[4*i:], x[i] + y[i])
 
 
 def crypto_core_salsa20_tweet(out, in_, k, c):
@@ -189,21 +192,22 @@ def crypto_stream_salsa20_tweet_xor(c, m, b, n, k):
 
     for i in range(8): z[i] = n[i]
 
+    c_off = 0 ; m_off = 0
     while b >= 64:
         crypto_core_salsa20_tweet(x, z, k, sigma)
-        for i in range(64): c[i] = (m if m[i] else 0) ^ x[i]
+        for i in range(64): c[i + c_off] = (m[i + m_off] if m else 0) ^ x[i]
         u = u32(1)
         for i in range(8, 16):
             u += u32(z[i])
             z[i] = u
             u >>= 8
         b -= 64
-        c += 64
-        if m: m += 64
+        c_off += 64
+        if m: m_off += 64
 
     if b:
         crypto_core_salsa20_tweet(x, z, k, sigma)
-        for i in range(b): c[i] = (m if m[i] else 0) ^ x[i]
+        for i in range(b): c[i + c_off] = (m[i + m_off] if m else 0) ^ x[i]
 
     return 0
 
@@ -217,21 +221,21 @@ def crypto_stream_xsalsa20_tweet(c, d, n, k):
     '''int crypto_stream_xsalsa20_tweet(u8*c, u64 d, const u8*n, const u8*k)'''
     s = IntArray(u8, size=32)
     crypto_core_hsalsa20_tweet(s, n, k, sigma)
-    return crypto_stream_salsa20_tweet(c, d, n + 16, s)
+    return crypto_stream_salsa20_tweet(c, d, n[16:], s)
 
 
 def crypto_stream_xsalsa20_tweet_xor(c, m, d, n, k):
     '''int crypto_stream_xsalsa20_tweet_xor(u8*c, const u8*m, u64 d, const u8*n, const u8*k)'''
     s = IntArray(u8, size=32)
     crypto_core_hsalsa20_tweet(s, n, k, sigma)
-    return crypto_stream_salsa20_tweet_xor(c, m, d, n + 16, s)
+    return crypto_stream_salsa20_tweet_xor(c, m, d, n[16:], s)
 
 
 def add1305(h, c):
     '''void add1305(u32*h, const u32*c)'''
     u = u32()
     for j in range(17):
-        u += h[j] + c[j]
+        u += u32(h[j] + c[j])
         h[j] = u & 255
         u >>= 8
 
@@ -261,11 +265,11 @@ def crypto_onetimeauth_poly1305_tweet(out, m, n, k):
     while n > 0:
         for j in range(17): c[j] = 0
         for j in range(16):
-            if not j < n: break
+            if j >= n: j -= 1 ; break
             c[j] = m[j]
+        j += 1
         c[j] = 1
-        m += j; n -= j
-
+        m = m[j:]; n -= j
         add1305(h, c)
 
         for i in range(17):
@@ -314,7 +318,9 @@ def crypto_secretbox_xsalsa20poly1305_tweet(c, m, d, n, k):
     '''int crypto_secretbox_xsalsa20poly1305_tweet(u8*c, const u8*m, u64 d, const u8*n, const u8*k)'''
     if d < 32: return -1
     crypto_stream_xsalsa20_tweet_xor(c, m, d, n, k)
-    crypto_onetimeauth_poly1305_tweet(c + 16, c + 32, d - 32, c)
+    c_out = c[16:]
+    crypto_onetimeauth_poly1305_tweet(c_out, c[32:], d - 32, c)
+    c[16:] = c_out
     for i in range(16): c[i] = 0
     return 0
 
@@ -324,7 +330,7 @@ def crypto_secretbox_xsalsa20poly1305_tweet_open(m, c, d, n, k):
     x = IntArray(u8, size=32)
     if d < 32: return -1
     crypto_stream_xsalsa20_tweet(x, 32, n, k)
-    if crypto_onetimeauth_poly1305_tweet_verify(c + 16, c + 32, d - 32, x) != 0: return -1
+    if crypto_onetimeauth_poly1305_tweet_verify(c[16:], c[32:], d - 32, x) != 0: return -1
     crypto_stream_xsalsa20_tweet_xor(m, c, d, n, k)
     for i in range(32): m[i] = 0
     return 0
@@ -353,6 +359,7 @@ def sel25519(p, q, b):
         t = c & (p[i] ^ q[i])
         p[i] ^= t
         q[i] ^= t
+    return p, q
 
 
 def pack25519(o, n):
@@ -426,6 +433,8 @@ def M(o, a, b):
     car25519(o)
     car25519(o)
 
+    return o
+
 
 def S(o, a):
     '''void S(gf o, const gf a)'''
@@ -441,6 +450,8 @@ def inv25519(o, i):
         if a != 2 and a != 4: M(c, c, i)
 
     for a in range(16): o[a] = c[a]
+
+    return o
 
 
 def pow2523(o, i):
@@ -509,9 +520,9 @@ def crypto_scalarmult_curve25519_tweet(q, n, p):
         x[i + 48] = b[i]
         x[i + 64] = d[i]
 
-    inv25519(x + 32, x + 32)
-    M(x + 16, x + 16, x + 32)
-    pack25519(q, x + 16)
+    x[32:] = inv25519(x[32:], x[32:])
+    x[16:] = M(x[16:], x[16:], x[32:])
+    pack25519(q, x[16:])
     return 0
 
 
@@ -559,17 +570,17 @@ def crypto_box_curve25519xsalsa20poly1305_tweet_open(m, c, d, n, y, x):
 
 def R(x, c):
     '''u64 R(u64 x, int c)'''
-    return (x >> c) | (x << (64 - c))
+    return (u64(x) >> c) | (u64(x) << (64 - c))
 
 
 def Ch(x, y, z):
     '''u64 Ch(u64 x, u64 y, u64 z)'''
-    return (x & y) ^ (~x & z)
+    return (u64(x) & u64(y)) ^ (~u64(x) & u64(z))
 
 
 def Maj(x, y, z):
     '''u64 Maj(u64 x, u64 y, u64 z)'''
-    return (x & y) ^ (x & z) ^ (y & z)
+    return (u64(x) & u64(y)) ^ (u64(x) & u64(z)) ^ (u64(y) & u64(z))
 
 
 def Sigma0(x):
@@ -624,10 +635,11 @@ def crypto_hashblocks_sha512_tweet(x, m, n):
     w = IntArray(u64, size=16)
     t = u64()
 
-    for i in range(8): z[i] = a[i] = dl64(x + 8*i)
+    for i in range(8): z[i] = a[i] = dl64(x[8*i:])
 
+    m_off = 0
     while n >= 128:
-        for i in range(16): w[i] = dl64(m + 8*i)
+        for i in range(16): w[i] = dl64(m[8*i + m_off:])
 
         for i in range(80):
             for j in range(8): b[j] = a[j]
@@ -640,12 +652,13 @@ def crypto_hashblocks_sha512_tweet(x, m, n):
                 for j in range(16):
                     w[j] += w[(j + 9)%16] + sigma0(w[(j + 1)%16]) + sigma1(w[(j + 14)%16])
 
-        for i in range(8): a[i] += z[i]; z[i] = a[i]
+        for i in range(8):
+            a[i] += z[i]; z[i] = a[i]
 
-        m += 128
+        m_off += 128
         n -= 128
 
-    for i in range(8): ts64(x + 8*i, z[i])
+    for i in range(8): x[8*i:] = ts64(x[8*i:], z[i])
 
     return n
 
@@ -671,17 +684,17 @@ def crypto_hash_sha512_tweet(out, m, n):
     for i in range(64): h[i] = iv[i]
 
     crypto_hashblocks_sha512_tweet(h, m, n)
-    m += n
+    m_off = n
     n &= 127
-    m -= n
+    m_off -= n
 
     for i in range(256): x[i] = 0
-    for i in range(n): x[i] = m[i]
+    for i in range(n): x[i] = m[i + m_off]
     x[n] = 128
 
     n = 256 - 128*(n < 112)
     x[n - 9] = b >> 61
-    ts64(x + n - 8, b << 3)
+    x[n - 8:] = ts64(x[n - 8:], b << 3)
     crypto_hashblocks_sha512_tweet(h, x, n)
 
     for i in range(64): out[i] = h[i]
@@ -725,7 +738,7 @@ def add(p, q):
 def cswap(p, q, b):
     '''void cswap(gf p[4], gf q[4], u8 b)'''
     for i in range(4):
-        sel25519(p[i], q[i], b)
+        p[i], q[i] = sel25519(p[i], q[i], b)
 
 
 def pack(r, p):
@@ -796,6 +809,7 @@ def modL(r, x):
             x[j] += carry - 16*x[i]*L[j - (i - 32)]
             carry = (x[j] + 128) >> 8
             x[j] -= carry << 8
+        j += 1
         x[j] += carry
         x[i] = 0
 
@@ -809,6 +823,8 @@ def modL(r, x):
     for i in range(32):
         x[i + 1] += x[i] >> 8
         r[i] = x[i] & 255
+
+    return r
 
 
 def reduce(r):
@@ -832,11 +848,15 @@ def crypto_sign_ed25519_tweet(sm, smlen, m, n, sk):
     d[31] &= 127
     d[31] |= 64
 
+    # There is no (simple?) way to return this argument's value back to the
+    # user in python.  Rather than redefining the return value of this function
+    # it is better to advise the user that ``smlen`` does not work as it does
+    # in the C implementation and that its value will be equal to ``n + 64``.
     smlen = n + 64
     for i in range(n): sm[64 + i] = m[i]
     for i in range(32): sm[32 + i] = d[32 + i]
 
-    crypto_hash_sha512_tweet(r, sm + 32, n + 32)
+    crypto_hash_sha512_tweet(r, sm[32:], n + 32)
     reduce(r)
     scalarbase(p, r)
     pack(sm, p)
@@ -849,7 +869,7 @@ def crypto_sign_ed25519_tweet(sm, smlen, m, n, sk):
     for i in range(32): x[i] = u64(r[i])
     for i in range(32):
         for j in range(32): x[i + j] += h[i]*u64(d[j])
-    modL(sm + 32, x)
+    sm[32:] = modL(sm[32:], x)
 
     return 0
 
@@ -915,7 +935,7 @@ def crypto_sign_ed25519_tweet_open(m, mlen, sm, n, pk):
     reduce(h)
     scalarmult(p, q, h)
 
-    scalarbase(q, sm + 32)
+    scalarbase(q, sm[32:])
     add(p, q)
     pack(t, p)
 
@@ -925,5 +945,10 @@ def crypto_sign_ed25519_tweet_open(m, mlen, sm, n, pk):
         return -1
 
     for i in range(n): m[i] = sm[i + 64]
+    # There is no (simple?) way to return this argument's value back to the
+    # user in python.  Rather than redefining the return value of this function
+    # it is better to advise the user that ``mlen`` does not work as it does in
+    # the C implementation and that its value will be equal to ``-1`` if ``n <
+    # 64`` or decryption fails and ``n - 64`` otherwise.
     mlen = n
     return 0
