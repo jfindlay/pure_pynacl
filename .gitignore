@@ -1,0 +1,5 @@
+*.o
+*.so
+c_test*
+nacl-*/
+nacl-*.tar.bz2
