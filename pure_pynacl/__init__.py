@@ -185,3 +185,33 @@ class IntArray(list):
 
     def __repr__(self):
         return 'IntArray(%s, init=%s)' % (self.typ, list.__repr__(self))
+
+
+# TweetNaCl external functions
+from pure_pynacl.tweetnacl import (
+    crypto_verify_16_tweet,
+    crypto_verify_32_tweet,
+    crypto_core_salsa20_tweet,
+    crypto_core_hsalsa20_tweet,
+    crypto_stream_salsa20_tweet_xor,
+    crypto_stream_salsa20_tweet,
+    crypto_stream_xsalsa20_tweet,
+    crypto_stream_xsalsa20_tweet_xor,
+    crypto_onetimeauth_poly1305_tweet,
+    crypto_onetimeauth_poly1305_tweet_verify,
+    crypto_secretbox_xsalsa20poly1305_tweet,
+    crypto_secretbox_xsalsa20poly1305_tweet_open,
+    crypto_scalarmult_curve25519_tweet,
+    crypto_scalarmult_curve25519_tweet_base,
+    crypto_box_curve25519xsalsa20poly1305_tweet_keypair,
+    crypto_box_curve25519xsalsa20poly1305_tweet_beforenm,
+    crypto_box_curve25519xsalsa20poly1305_tweet_afternm,
+    crypto_box_curve25519xsalsa20poly1305_tweet_open_afternm,
+    crypto_box_curve25519xsalsa20poly1305_tweet,
+    crypto_box_curve25519xsalsa20poly1305_tweet_open,
+    crypto_hashblocks_sha512_tweet,
+    crypto_hash_sha512_tweet,
+    crypto_sign_ed25519_tweet_keypair,
+    crypto_sign_ed25519_tweet,
+    crypto_sign_ed25519_tweet_open,
+)
