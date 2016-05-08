@@ -58,7 +58,7 @@ class Int(integer):
         signed type
         '''
         self_order = self.order
-        other_order = other.order if hasattr(other, 'order') else TypeEnum.integer
+        other_order = other.order if isinstance(other, Int) else TypeEnum.integer
 
         if result < 0 and self_order < 5 and other_order < 5:
             return Int
@@ -89,8 +89,7 @@ class Int(integer):
             larger
             '''
             result = oper(self, other)
-            typ = self.__promote_type(other, result)
-            return typ(result)
+            return self.__promote_type(other, result)(result)
         return operate
 
     def __shift(oper):
@@ -102,8 +101,7 @@ class Int(integer):
             '''
             emulate C bit shifting
             '''
-            result = oper(self, other)
-            return self.__class__(result)
+            return self.__class__(oper(self, other))
         return operate
 
     def __invert():

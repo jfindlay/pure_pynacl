@@ -3,6 +3,7 @@
 import os
 import sys
 import string
+import tempfile
 from collections import Iterable, Mapping
 from random import choice, randint
 from ctypes import CDLL, POINTER, sizeof
@@ -10,6 +11,19 @@ from subprocess import call
 
 
 lt_py3 = sys.version_info < (3,)
+
+
+def mkstemp(*args, **kwargs):
+    '''
+    return only a random file name
+    '''
+    close_fd = kwargs.pop('close_fd', True)
+    fd_, fpath = tempfile.mkstemp(*args, **kwargs)
+    if close_fd is False:
+        return (fd_, fpath)
+    os.close(fd_)
+    del fd_
+    return fpath
 
 
 def isiterable(arg):
