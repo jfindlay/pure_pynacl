@@ -688,7 +688,7 @@ def crypto_hash_sha512_tweet(out, m, n):
     n &= 127
     m_off -= n
 
-    x[:] = 256*[u8()]
+    x[:256] = 256*[u8()]
     for i in range(n): x[i] = m[i + m_off]
     x[n] = 128
 
@@ -831,7 +831,7 @@ def reduce(r):
     '''void reduce(u8*r)'''
     x = IntArray(i64, size=64)
     for i in range(64): x[i] = u64(r[i])
-    r[:] = 64*[u8()]
+    r[:64] = 64*[u8()]
     modL(r, x)
 
 
