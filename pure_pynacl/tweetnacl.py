@@ -263,7 +263,7 @@ def crypto_onetimeauth_poly1305_tweet(out, m, n, k):
     r[15] &= 15
 
     while n > 0:
-        c[:] = 17*[u32()]
+        c[:17] = 17*[u32()]
         for j in range(16):
             if j >= n: j -= 1 ; break
             c[j] = m[j]
@@ -332,7 +332,7 @@ def crypto_secretbox_xsalsa20poly1305_tweet_open(m, c, d, n, k):
     crypto_stream_xsalsa20_tweet(x, 32, n, k)
     if crypto_onetimeauth_poly1305_tweet_verify(c[16:], c[32:], d - 32, x) != 0: return -1
     crypto_stream_xsalsa20_tweet_xor(m, c, d, n, k)
-    m[:] = 32*[u8()]
+    m[:32] = 32*[u8()]
     return 0
 
 
@@ -688,7 +688,7 @@ def crypto_hash_sha512_tweet(out, m, n):
     n &= 127
     m_off -= n
 
-    x[:] = 256*[u8()]
+    x[:256] = 256*[u8()]
     for i in range(n): x[i] = m[i + m_off]
     x[n] = 128
 
@@ -831,7 +831,7 @@ def reduce(r):
     '''void reduce(u8*r)'''
     x = IntArray(i64, size=64)
     for i in range(64): x[i] = u64(r[i])
-    r[:] = 64*[u8()]
+    r[:64] = 64*[u8()]
     modL(r, x)
 
 
