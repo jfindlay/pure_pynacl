@@ -1,5 +1,5 @@
-*.o
-*.so
-c_test*
-nacl-*/
-nacl-*.tar.bz2
+.tox/
+*.egg-info/
+__pycache__/
+build/
+dist/

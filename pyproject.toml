@@ -1,0 +1,30 @@
+[project]
+name = "pure_pynacl"
+version = "1.0.0"
+authors = [
+  { name="Justin Findlay", email="justin@findlay.space" },
+]
+description = "Pure python implementation of TweetNaCl"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/jfindlay/pure_pynacl/"
+"Bug Tracker" = "https://github.com/jfindlay/pure_pynacl/issues/"
+
+[build-system]
+requires = [
+    "build",
+    "setuptools",
+    "pytest",
+    "tox>=4.0",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["pure_pynacl"]
