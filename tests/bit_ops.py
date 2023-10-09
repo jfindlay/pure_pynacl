@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-from pure_pynacl.tweetnacl import u8, u32, u64, i64
-
+from pure_pynacl.tweetnacl import i64, u8, u32, u64
 
 # unsigned 8 bit tests
 

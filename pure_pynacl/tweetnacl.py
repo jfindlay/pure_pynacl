@@ -1,12 +1,7 @@
-# -*- coding: utf-8 -*-
-
-# import python libs
 import os
 from array import array
 
-# import pure_pynacl libs
-from pure_pynacl import lt_py3, lt_py33
-from pure_pynacl import TypeEnum, integer, Int, IntArray
+from pure_pynacl import Int, IntArray, TypeEnum
 
 
 class u8(Int):
@@ -16,9 +11,6 @@ class u8(Int):
     signed = False
     order = TypeEnum.u8
 
-    def __repr__(self):
-        return 'u8(%s)' % integer.__repr__(self)
-
 
 class u32(Int):
     '''unsigned long'''
@@ -27,30 +19,21 @@ class u32(Int):
     signed = False
     order = TypeEnum.u32
 
-    def __repr__(self):
-        return 'u32(%s)' % integer.__repr__(self)
-
 
 class u64(Int):
     '''unsigned long long'''
-    bits = array('L' if lt_py33 else 'Q').itemsize*8
+    bits = array('Q').itemsize*8
     mask = (1 << bits) - 1
     signed = False
     order = TypeEnum.u64
 
-    def __repr__(self):
-        return 'u64(%s)' % integer.__repr__(self)
-
 
 class i64(Int):
     '''long long'''
-    bits = array('l' if lt_py33 else 'q').itemsize*8
+    bits = array('q').itemsize*8
     mask = (1 << bits - 1) - 1
     signed = True
     order = TypeEnum.i64
-
-    def __repr__(self):
-        return 'i64(%s)' % integer.__repr__(self)
 
 
 class gf(IntArray):
@@ -62,10 +45,7 @@ def randombytes(c, s):
     '''
     insert s random bytes into c
     '''
-    if lt_py3:
-        c[:s] = bytearray(os.urandom(s))
-    else:
-        c[:s] = os.urandom(s)
+    c[:s] = os.urandom(s)
 
 
 _0 = IntArray(u8, size=16)
